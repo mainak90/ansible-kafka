@@ -1,0 +1,6 @@
+---
+kafka_version: "1.0.0"
+kafka_scala_version: "2.11"
+
+# set to false in order to install to NFS location (lib)
+kafka_install_local: true

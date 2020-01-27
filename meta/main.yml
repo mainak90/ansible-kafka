@@ -1,0 +1,5 @@
+---
+
+galaxy_info:
+  author: Mainak Dhar
+  description: role to setup a Kafka cluster

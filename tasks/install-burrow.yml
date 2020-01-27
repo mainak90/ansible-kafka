@@ -1,0 +1,38 @@
+---
+
+- name: create required burrow directories
+  file:
+    path: "/{{ env }}/loc/sft/{{ prj }}/{{ item }}"
+    state: "directory"
+    owner: "{{ usr }}"
+    group: "{{ usr }}"
+    mode: "0775"
+  with_items:
+    - "burrow"
+    - "log/burrow"
+- name: select burrow template
+  set_fact:
+    kafka_hostname_prefix: "{{ 'kfkocs' if prj | search('ocs') else prj }}"
+
+- name: create the burrow config file
+  template:
+    src: "burrow.toml.j2"
+    dest: "/{{ env }}/loc/sft/{{ prj }}/burrow/burrow.toml"
+    mode: 0600
+  tags: burrow_conf
+  become: yes
+  become_user: "{{ usr }}"
+
+- name: create systemd service for burrow instance
+  template:
+    src: "burrow.service.j2"
+    dest: "/usr/lib/systemd/system/burrow.service"
+    mode: 0644
+
+- name: enable and start burrow systemd service
+  systemd:
+    name: "burrow"
+    daemon_reload: yes
+    state: started
+    enabled: true
+

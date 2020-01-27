@@ -1,0 +1,24 @@
+---
+
+- name: create required lib directories
+  file:
+    path: "/{{ env }}/lib/sft/kafka/{{ item }}"
+    state: "directory"
+    owner: "{{ env_prefix }}kafka"
+    group: "{{ env_prefix }}kafka"
+    mode: "0775"
+  with_items:
+    - "install"
+    - "install/{{ kafka_version }}"
+  when: "'machineA' in group_names"
+
+- name: extract Kafka library to NFS location
+  unarchive:
+    src: "/sysadm/lib/software/kafka/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
+    dest: "/{{ env }}/lib/sft/kafka/install/{{ kafka_version }}"
+    extra_opts: "--strip-components=1"
+    creates: "/{{ env }}/lib/sft/kafka/install/{{ kafka_version }}/bin/kafka-run-class.sh"
+  become: yes
+  become_user: "{{ env_prefix }}kafka"
+  when: "'machineA' in group_names"
+

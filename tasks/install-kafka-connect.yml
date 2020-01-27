@@ -1,0 +1,28 @@
+---
+- name: extract connect jars
+  unarchive:
+    src: "/sysadm/lib/software/kafka/connect-plugins-{{ kafka_version }}.tgz"
+    dest: "/{{ env }}/lib/sft/kafka"
+    creates: "/{{ env }}/lib/sft/kafka/connect-plugins"
+  become: yes
+  become_user: "{{ env_prefix }}kafka"
+  when: "'machineA' in group_names"
+
+- name: create needed kafka topics
+  shell: /{{ env }}/lib/ctl/kfkcrp/bin/kfkcrp_topics.sh -a SYNC
+  become: true
+  become_user: "{{ usr }}"
+
+- name: create systemd service for kafka connect
+  template:
+    src: "{{ kafka_connect_template }}"
+    dest: "/usr/lib/systemd/system/{{ prj }}-connect.service"
+    mode: 0644
+
+- name: enable and start kafka connect systemd service
+  systemd:
+    name: "{{ prj }}-connect"
+    daemon_reload: yes
+    state: started
+    enabled: true
+

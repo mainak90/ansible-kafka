@@ -1,0 +1,45 @@
+---
+
+
+- name: create required local directories
+  file:
+    path: "/{{ loc }}/{{ item }}"
+    state: "directory"
+    owner: "{{ usr }}"
+    group: "{{ usr }}"
+    mode: "0750"
+  with_items:
+    - "data"
+    - "work"
+    - "log"
+  tags: always
+
+- name: download Kafka distribution for the specified version to the sysadm repo
+  get_url:
+    url: "http://apache.belnet.be/kafka/{{ kafka_version }}/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
+    dest: "/sysadm/lib/software/kafka/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
+  delegate_to: "elp000008.mgt.telenet.be"
+  tags: download
+  run_once: true
+
+- name: install kafka libraries, local or shared
+  include_tasks: "install-{{ kafka_install_local | ternary ('local', 'shared') }}.yml"
+  tags: install
+
+- name: enable systemd and start the kafka broker
+  include_tasks: systemd.yml
+  tags: systemd
+
+- name: install burrow
+  include_tasks: install-burrow.yml
+  tags: burrow
+
+- name: enable kafka connect
+  include_tasks: install-kafka-connect.yml
+  tags: kafka-connect
+  when: kafka_connect_template is defined
+
+- name: enable kafka mirrormaker
+  include_tasks: install-kafka-mirrormaker.yml
+  tags: kafka-mirrormaker
+  when: kafka_mirrormaker_template is defined

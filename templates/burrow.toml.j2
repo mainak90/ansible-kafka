@@ -1,0 +1,70 @@
+[general]
+pidfile="/{{ env }}/loc/sft/{{ prj }}/work/burrow.pid"
+stdout-logfile="/{{ env }}/loc/sft/{{ prj }}/log/burrow/burrow.out"
+access-control-allow-origin="{{ ansible_domain }}"
+
+[logging]
+filename="/{{ env }}/loc/sft/{{ prj }}/log/burrow/logs/burrow.log"
+level="info"
+maxsize=100
+maxbackups=30
+maxage=10
+use-localtime=false
+use-compression=true
+
+[zookeeper]
+servers=[ "{{ kafka_hostname_prefix|replace("kfk","zoo") }}a1.{{ env }}.{{ ansible_domain }}:2181", "{{ kafka_hostname_prefix|replace("kfk","zoo") }}b1.{{ env }}.{{ ansible_domain }}:2181", "{{ kafka_hostname_prefix|replace("kfk","zoo") }}c1.{{ env }}.{{ ansible_domain }}:2181" ]
+timeout=6
+root-path="/burrow"
+
+[client-profile.burrow]
+client-id="burrow"
+kafka-version="{{ kafka_version }}"
+
+[cluster.{{ prj }}]
+class-name="kafka"
+servers=[ "{{ kafka_hostname_prefix }}a1.{{ env }}.{{ ansible_domain }}:9092","{{ kafka_hostname_prefix }}b1.{{ env }}.{{ ansible_domain }}:9092", "{{ kafka_hostname_prefix }}c1.{{ env }}.{{ ansible_domain }}:9092" ]
+client-profile="burrow"
+topic-refresh=120
+offset-refresh=30
+
+[consumer.{{ prj }}]
+class-name="kafka"
+cluster="{{ prj }}"
+servers=[ "{{ kafka_hostname_prefix }}a1.{{ env }}.{{ ansible_domain }}:9092","{{ kafka_hostname_prefix }}b1.{{ env }}.{{ ansible_domain }}:9092", "{{ kafka_hostname_prefix }}c1.{{ env }}.{{ ansible_domain }}:9092" ]
+client-profile="burrow"
+#group-blacklist="^(console-consumer-|python-kafka-consumer-|quick-).*$"
+group-whitelist=""
+
+#[consumer.{{ prj }}zk]
+#class-name="kafka_zk"
+#cluster="{{ prj }}"
+#servers=[ "{{ kafka_hostname_prefix|replace("kfk","zoo") }}a1.{{ env }}.{{ ansible_domain }}:2181", "{{ kafka_hostname_prefix|replace("kfk","zoo") }}b1.{{ env }}.{{ ansible_domain }}:2181", "{{ kafka_hostname_prefix|replace("kfk","zoo") }}c1.{{ env }}.{{ ansible_domain }}:2181" ]
+#client-profile="burrow"
+#group-blacklist="^(console-consumer-|python-kafka-consumer-|quick-).*$"
+#group-whitelist=""
+
+[httpserver.default]
+address=":8000"
+
+[storage.default]
+class-name="inmemory"
+workers=20
+intervals=15
+expire-group=604800
+min-distance=1
+
+#[notifier.default]
+#class-name="http"
+#url-open="http://someservice.example.com:1467/v1/event"
+#interval=60
+#timeout=5
+#keepalive=30
+#extras={ api_key="REDACTED", app="burrow", tier="STG", fabric="mydc" }
+#template-open="conf/default-http-post.tmpl"
+#template-close="conf/default-http-delete.tmpl"
+#method-close="DELETE"
+#send-close=true
+#threshold=1
+
+

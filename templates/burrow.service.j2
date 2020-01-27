@@ -1,0 +1,19 @@
+
+[Unit]
+Description=Burrow instance: {{ prj }}
+PartOf={{ prj }}.service
+
+[Service]
+PIDFile=/{{ env }}/loc/sft/{{ prj }}/work/borrow.pid
+ExecStart=-/usr/local/bin/Burrow --config-dir /{{ env }}/loc/sft/{{ prj }}/burrow
+WorkingDirectory={{ loc }}
+Restart=always
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=burrow
+User={{ usr }}
+Group={{ usr }}
+
+
+[Install]
+WantedBy=multi-user.target

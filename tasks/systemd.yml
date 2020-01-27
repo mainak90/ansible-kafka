@@ -1,0 +1,15 @@
+---
+
+- name: create systemd service for kafka instance
+  template:
+    src: "kafka.service.j2"
+    dest: "/usr/lib/systemd/system/{{ telenet_prj }}.service"
+    mode: 0644
+
+- name: enable and start kafka systemd service
+  systemd:
+    name: "{{ telenet_prj }}"
+    daemon_reload: yes
+    state: started
+    enabled: true
+

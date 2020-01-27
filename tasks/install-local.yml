@@ -1,0 +1,22 @@
+---
+
+- name: create required llb directories
+  file:
+    path: "/{{ llb }}/{{ item }}"
+    state: "directory"
+    owner: "{{ usr }}"
+    group: "{{ usr }}"
+    mode: "0775"
+  with_items:
+    - "install"
+    - "install/{{ kafka_version }}"
+
+- name: extract Kafka library to the local library FS
+  unarchive:
+    src: "/sysadm/lib/software/kafka/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
+    dest: "/{{ llb }}/install/{{ kafka_version }}"
+    extra_opts: "--strip-components=1"
+    creates: "/{{ llb }}/install/{{ kafka_version }}/bin/kafka-run-class.sh"
+  become: yes
+  become_user: "{{ usr }}"
+

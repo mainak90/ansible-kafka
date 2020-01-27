@@ -1,0 +1,24 @@
+
+[Unit]
+Description=Kafka mirrormaker instance: {{ prj }}
+Wants=network-online.target
+After=autofs.service
+
+[Service]
+Type=forking
+ExecStart=/{{ env }}/lib/ctl/{{ prj }}/bin/{{ prj }}_mirrormaker.sh -a start -s -e {{ env }}
+ExecStop=/{{ env }}/lib/ctl/{{ prj }}/bin/{{ prj }}_mirrormaker.sh -a stop -s -e {{ env }}
+
+SuccessExitStatus=0 143
+WorkingDirectory={{ loc }}
+Restart=always
+
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=telenet-{{ prj }}-mirrormaker
+
+User={{ usr }}
+Group={{ usr }}
+
+[Install]
+WantedBy=multi-user.target
